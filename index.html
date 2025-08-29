@@ -146,6 +146,8 @@
 
 <!-- Admin Dashboard -->
 <div id="adminView" style="display:none">
+
+  <!-- Create Account Card -->
   <div class="card">
     <div class="card-content">
       <h3>Create Account</h3>
@@ -155,15 +157,16 @@
     </div>
     <div class="card-well">
       <h4>Admin Info</h4>
-      <p>Accounts are loaded from JSON.</p>
+      <p>Accounts are loaded from JSON / database.</p>
     </div>
   </div>
 
+  <!-- Adjust Exchange Rate Card -->
   <div class="card">
     <div class="card-content">
       <h3>Adjust Exchange Rate</h3>
       <input type="text" id="rateSym" placeholder="Currency (e.g., USD)">
-      <input type="number" id="rateVal" placeholder="New USD Rate">
+      <input type="number" id="rateVal" placeholder="New Rate">
       <button class="btn" onclick="setRate()">Update Rate</button>
     </div>
     <div class="card-well">
@@ -172,6 +175,7 @@
     </div>
   </div>
 
+  <!-- Adjust Balance Card -->
   <div class="card">
     <div class="card-content">
       <h3>Adjust Balance</h3>
@@ -185,6 +189,20 @@
       <div class="log" id="sysLog"></div>
     </div>
   </div>
+
+  <!-- All Users Table Card -->
+  <div class="card">
+    <div class="card-content">
+      <h3>All Users</h3>
+      <table id="userTable" border="1" style="width:100%; text-align:center; border-collapse: collapse;">
+        <thead>
+          <tr id="userTableHead"></tr>
+        </thead>
+        <tbody id="userTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
 </div>
 
 <!-- Logout Button -->
