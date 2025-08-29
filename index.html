@@ -348,6 +348,53 @@ function renderLog(){
   const logDiv = document.getElementById("sysLog");
   logDiv.innerHTML = transactions.map(t=>`${t.time}: ${t.from} → ${t.to} ${t.amount} (${t.currency})`).join("<br>");
 }
+  // --- Render user crypto ---
+function renderCrypto(){
+  let html="";
+  const cryptos = currentUser.cryptos || {};
+  for(const c in cryptos){
+    html+=`${c}: ${cryptos[c]}<br>`;
+  }
+  document.getElementById("cryptoBalances").innerHTML = html;
+}
+
+// --- Create crypto ---
+function createCrypto(){
+  const name = document.getElementById("newCryptoName").value.trim();
+  if(currentUser.balance.CAD < 100){ alert("Not enough CAD"); return; }
+  currentUser.balance.CAD -= 100;
+  currentUser.cryptos[name] = 0;
+  accounts[currentUser.username] = currentUser; // update global data
+  renderBalances();
+  renderCrypto();
+}
+
+// --- Buy crypto ---
+function buyCrypto(){
+  const name = document.getElementById("tradeCryptoName").value.trim();
+  const amount = parseFloat(document.getElementById("tradeAmount").value);
+  if(!currentUser.cryptos[name]){ alert("Crypto does not exist"); return; }
+  const price = 100 * amount; // demo fixed price
+  if(currentUser.balance.CAD < price){ alert("Not enough CAD"); return; }
+  currentUser.balance.CAD -= price;
+  currentUser.cryptos[name] += amount;
+  accounts[currentUser.username] = currentUser;
+  renderBalances();
+  renderCrypto();
+}
+
+// --- Sell crypto ---
+function sellCrypto(){
+  const name = document.getElementById("tradeCryptoName").value.trim();
+  const amount = parseFloat(document.getElementById("tradeAmount").value);
+  if(!currentUser.cryptos[name] || currentUser.cryptos[name] < amount){ alert("Not enough crypto"); return; }
+  const price = 100 * amount;
+  currentUser.cryptos[name] -= amount;
+  currentUser.balance.CAD += price;
+  accounts[currentUser.username] = currentUser;
+  renderBalances();
+  renderCrypto();
+}
 </script>
 
 </body>
