@@ -144,6 +144,25 @@
   </div>
 </div>
 
+<!-- Crypto Section -->
+<div class="card" id="cryptoCard">
+  <div class="card-content">
+    <h3>Your Cryptos</h3>
+    <div id="cryptoBalances"></div>
+
+    <h4>Create New Crypto (100 CAD)</h4>
+    <input type="text" id="newCryptoName" placeholder="Crypto Name">
+    <button onclick="createCrypto()">Create Crypto</button>
+
+    <h4>Trade Crypto</h4>
+    <input type="text" id="tradeCryptoName" placeholder="Crypto Name">
+    <input type="number" id="tradeAmount" placeholder="Amount">
+    <button onclick="buyCrypto()">Buy</button>
+    <button onclick="sellCrypto()">Sell</button>
+  </div>
+</div>
+
+
 <!-- Admin Dashboard -->
 <div id="adminView" style="display:none">
 
