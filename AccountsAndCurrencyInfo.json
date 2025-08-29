@@ -1,0 +1,24 @@
+{
+  "accounts": [
+    {
+      "username": "admin",
+      "password": "admin123",
+      "balance": {
+        "CAD": 1000,
+        "USD": 0
+      }
+    },
+    {
+      "username": "user1",
+      "password": "pass1",
+      "balance": {
+        "CAD": 500,
+        "USD": 0
+      }
+    }
+  ],
+  "exchangeRates": {
+    "CAD": 1,
+    "USD": 0.7266
+  }
+}
