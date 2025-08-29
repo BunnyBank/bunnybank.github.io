@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BunnyBank Demo</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #f4f4f4;
+  }
+
+  .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    margin: 20px;
+    padding: 20px;
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    justify-content: space-between;
+    box-sizing: border-box;
+  }
+
+  .card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    flex: 3;
+  }
+
+  .card-well {
+    flex: 1;
+    background: #f5f5f5;
+    padding: 15px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    box-sizing: border-box;
+  }
+
+  .card-content h3 {
+    margin-bottom: 10px;
+  }
+
+  .card-content input[type="text"],
+  .card-content input[type="password"],
+  .card-content input[type="number"] {
+    width: 85%;
+    max-width: 320px;
+    padding: 10px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+  }
+
+  .btn {
+    width: 85%;
+    max-width: 320px;
+    padding: 10px;
+    margin: 12px 0;
+    border: none;
+    border-radius: 5px;
+    background: #0078d7;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  .btn:hover { background: #005fa3; }
+
+  #logoutBtn {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    display: none;
+  }
+
+  .log {
+    font-size: 0.9em;
+    background: #f9f9f9;
+    padding: 10px;
+    height: 150px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+  }
+
+  .section-title { font-weight: bold; margin-bottom: 8px; }
+</style>
+</head>
+<body>
+
+<div class="container">
+<h1>BunnyBank Demo</h1>
+
+<!-- Login Card -->
+<div class="card" id="loginCard">
+  <div class="card-content">
+    <h3>Login</h3>
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <button class="btn" onclick="login()">Login</button>
+  </div>
+</div>
+
+<!-- User Dashboard -->
+<div id="userView" style="display:none">
+  <div class="card">
+    <div class="card-content">
+      <h3>Your Balances</h3>
+      <div id="balances"></div>
+    </div>
+    <div class="card-well">
+      <h4>Quick Info</h4>
+      <div id="quickInfo"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-content">
+      <h3>Send Money</h3>
+      <input type="text" id="toUser" placeholder="Recipient Username">
+      <input type="number" id="amt" placeholder="Amount">
+      <input type="text" id="curFrom" placeholder="From Currency (e.g., CAD)">
+      <input type="text" id="curTo" placeholder="To Currency (e.g., USD)">
+      <button class="btn" onclick="sendMoney()">Send</button>
+    </div>
+    <div class="card-well">
+      <h4>Tip</h4>
+      <p>You can exchange currencies using current rates.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Admin Dashboard -->
+<div id="adminView" style="display:none">
+  <div class="card">
+    <div class="card-content">
+      <h3>Create Account</h3>
+      <input type="text" id="newUser" placeholder="New Username">
+      <input type="text" id="newPass" placeholder="New Password">
+      <button class="btn" onclick="createAccount()">Create</button>
+    </div>
+    <div class="card-well">
+      <h4>Admin Info</h4>
+      <p>Accounts are loaded from JSON.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-content">
+      <h3>Adjust Exchange Rate</h3>
+      <input type="text" id="rateSym" placeholder="Currency (e.g., USD)">
+      <input type="number" id="rateVal" placeholder="New USD Rate">
+      <button class="btn" onclick="setRate()">Update Rate</button>
+    </div>
+    <div class="card-well">
+      <h4>Rates Info</h4>
+      <div id="rateInfo"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-content">
+      <h3>Adjust Balance</h3>
+      <input type="text" id="adjUser" placeholder="Username">
+      <input type="text" id="adjCurrency" placeholder="Currency (e.g., CAD)">
+      <input type="number" id="adjAmount" placeholder="New Amount">
+      <button class="btn" onclick="setBalance()">Update Balance</button>
+    </div>
+    <div class="card-well">
+      <h4>Transaction Log</h4>
+      <div class="log" id="sysLog"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Logout Button -->
+<button id="logoutBtn" onclick="logout()">Logout</button>
+
+</div>
+
+<script>
+let accounts = [];
+let exchangeRates = {};
+let transactions = [];
+let currentUser = null;
+
+// Load JSON data from repo
+fetch("AccountsAndCurrencyInfo.json")
+  .then(res => res.json())
+  .then(data => {
+    accounts = data.accounts;
+    exchangeRates = data.exchangeRates;
+    console.log("Accounts loaded:", accounts);
+    renderRateInfo();
+  })
+  .catch(err => console.error("Failed to load JSON:", err));
+
+function login(){
+  const u = document.getElementById("username").value.trim();
+  const p = document.getElementById("password").value.trim();
+  const acc = accounts.find(a => a.username === u && a.password === p);
+  if(!acc){ alert("Login failed"); return; }
+
+  currentUser = acc;
+  document.getElementById("loginCard").style.display="none";
+  document.getElementById("userView").style.display="block";
+  document.getElementById("logoutBtn").style.display="block";
+
+  // Show admin dashboard if admin
+  if(currentUser.username==="admin") document.getElementById("adminView").style.display="block";
+
+  renderBalances();
+  renderQuickInfo();
+  renderLog();
+}
+
+function logout(){
+  currentUser = null;
+  document.getElementById("loginCard").style.display="block";
+  document.getElementById("userView").style.display="none";
+  document.getElementById("adminView").style.display="none";
+  document.getElementById("logoutBtn").style.display="none";
+}
+
+function renderBalances(){
+  const balDiv = document.getElementById("balances");
+  balDiv.innerHTML = "";
+  if(!currentUser.balance) currentUser.balance={};
+  for(const c in currentUser.balance){
+    balDiv.innerHTML += `${c}: ${currentUser.balance[c]}<br>`;
+  }
+}
+
+function renderQuickInfo(){
+  const infoDiv = document.getElementById("quickInfo");
+  infoDiv.innerHTML = "";
+  for(const c in currentUser.balance){
+    const usd = currentUser.balance[c]/exchangeRates[c];
+    infoDiv.innerHTML += `${c} → USD: ${usd.toFixed(2)}<br>`;
+  }
+}
+
+function sendMoney(){
+  const to = document.getElementById("toUser").value.trim();
+  const amt = Number(document.getElementById("amt").value);
+  const fromC = document.getElementById("curFrom").value.trim().toUpperCase();
+  const toC = document.getElementById("curTo").value.trim().toUpperCase();
+  if(!accounts.find(a=>a.username===to)){ alert("Recipient not found"); return; }
+  if(currentUser.balance[fromC]===undefined || currentUser.balance[fromC]<amt){ alert("Insufficient funds"); return; }
+
+  currentUser.balance[fromC]-=amt;
+  const recipient = accounts.find(a=>a.username===to);
+  recipient.balance[toC] = (recipient.balance[toC]||0) + (amt/exchangeRates[fromC])*exchangeRates[toC];
+
+  transactions.push({time:new Date().toLocaleString(), type:"SEND", from:currentUser.username, to:to, amount:amt, currency:`${fromC}->${toC}`});
+  renderBalances(); renderQuickInfo(); renderLog();
+}
+
+function createAccount(){
+  const u = document.getElementById("newUser").value.trim();
+  const p = document.getElementById("newPass").value.trim();
+  if(accounts.find(a=>a.username===u)){ alert("User exists"); return; }
+  accounts.push({username:u,password:p,balance:{CAD:100}});
+  alert("Account created (in-memory)");
+  renderLog();
+}
+
+function setRate(){
+  const sym = document.getElementById("rateSym").value.trim().toUpperCase();
+  const val = Number(document.getElementById("rateVal").value);
+  exchangeRates[sym] = val;
+  alert(`Rate updated: 1 ${sym} = ${val} USD`);
+  renderRateInfo();
+  renderQuickInfo();
+}
+
+function setBalance(){
+  const u = document.getElementById("adjUser").value.trim();
+  const c = document.getElementById("adjCurrency").value.trim().toUpperCase();
+  const amt = Number(document.getElementById("adjAmount").value);
+  const acc = accounts.find(a=>a.username===u);
+  if(!acc){ alert("User not found"); return; }
+  acc.balance[c]=amt;
+  alert("Balance updated (in-memory)");
+  renderBalances(); renderQuickInfo(); renderLog();
+}
+
+function renderRateInfo(){
+  const div = document.getElementById("rateInfo");
+  div.innerHTML="";
+  for(const c in exchangeRates){
+    div.innerHTML+=`${c}: ${exchangeRates[c]}<br>`;
+  }
+}
+
+function renderLog(){
+  const logDiv = document.getElementById("sysLog");
+  logDiv.innerHTML = transactions.map(t=>`${t.time}: ${t.from} → ${t.to} ${t.amount} (${t.currency})`).join("<br>");
+}
+</script>
+
+</body>
+</html>
