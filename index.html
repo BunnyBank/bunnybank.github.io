@@ -30,17 +30,23 @@
 <body>
   <header>
   <h1>
+    .top-left-img {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      width: 80px;
+      height: 80px;
+      z-index: 100;
+    }
     <img src="favicon.png" alt="Logo" style="height:28px;vertical-align:middle;margin-right:8px">
     Bunny Bank
   </h1>
   <p class="muted">Play demo — not real money</p>
 </header>
 
-<!-- Link favicon in browser tab -->
-<link rel="icon" type="image/png" href="favicon.png">
-
-
   <div class="wrap">
+  <!-- Top Left Image -->
+  <img src="favicon.png" alt="Logo" class="top-left-img">
     <!-- LOGIN (visible by default) -->
     <div class="card" id="loginCard">
       <h2>Login</h2>
