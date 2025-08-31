@@ -1,8 +1,8 @@
 :root {
   --bg: #f4f6f9;
   --card: #fff;
-  --accent: #ff6b6b;
-  --accent-hover: #ff4a55;
+  --accent: #2b7cff;
+  --accent-hover: #1f63d8;
   --muted: #777;
 }
 
@@ -10,12 +10,12 @@ body {
   font-family: Inter, Arial, Helvetica, sans-serif;
   background: var(--bg);
   margin: 0;
-  padding: 0 0 100px; /* extra bottom padding for logout */
+  padding: 0 0 100px; /* extra bottom padding for logout button */
 }
 
 /* Header */
 header {
-  background: #ff5a67;
+  background: var(--accent);
   color: #fff;
   padding: 28px 12px 44px;
   text-align: center;
@@ -31,7 +31,7 @@ header p {
   font-size: 13px;
 }
 
-/* Wrappers & Cards */
+/* Cards */
 .wrap {
   max-width: 920px;
   margin: 18px auto;
@@ -58,17 +58,19 @@ input, select, button {
   font-size: 14px;
 }
 button {
-  background: #2b7cff;
+  background: var(--accent);
   color: #fff;
   border: 0;
   cursor: pointer;
   transition: background 0.3s ease;
 }
-button:hover { background: #1f63d8; }
+button:hover { background: var(--accent-hover); }
 button.secondary {
   background: #eee;
   color: #222;
 }
+
+/* Grid layout */
 .grid {
   display: grid;
   grid-template-columns: repeat(2,1fr);

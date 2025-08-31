@@ -4,17 +4,43 @@
   <meta charset="utf-8" />
   <title>BunnyBank — Demo</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <link rel="stylesheet" href="style.css">
-  <link rel="icon" type="image/png" href="favicon.png">
+  <style>
+    :root{--bg:#f4f6f9;--card:#fff;--accent:#ff6b6b;--muted:#777}
+    body{font-family:Inter,Arial,Helvetica,sans-serif;background:var(--bg);margin:0;padding:0}
+    header{background:#ff5a67;color:#fff;padding:28px 12px 44px;text-align:center}
+    header h1{margin:0;font-size:28px;letter-spacing:.5px}
+    header p{margin:6px 0 0;color:rgba(255,255,255,0.9);font-size:13px}
+    .wrap{max-width:920px;margin:18px auto;padding:0 12px}
+    .card{background:var(--card);border-radius:10px;padding:18px;box-shadow:0 6px 18px rgba(20,20,30,0.06);margin-bottom:16px}
+    h2,h3{margin:0 0 10px}
+    input,select,button{display:block;width:100%;box-sizing:border-box;padding:10px;margin:6px 0;border-radius:6px;border:1px solid #e6e9ee;font-size:14px}
+    button{background:#2b7cff;color:#fff;border:0;cursor:pointer}
+    button.secondary{background:#eee;color:#222}
+    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    @media(max-width:700px){.grid{grid-template-columns:1fr}}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:8px;border:1px solid #edf0f3;text-align:center;font-size:14px}
+    #logoutBtn{position:fixed;right:18px;bottom:18px;padding:10px 14px;background:var(--accent);color:#fff;border:0;border-radius:8px;display:none;box-shadow:0 8px 20px rgba(0,0,0,0.12);cursor:pointer}
+    .muted{color:var(--muted);font-size:13px}
+    .small{font-size:13px;padding:8px}
+    .notice{background:#fffbe6;border-left:4px solid #ffd966;padding:10px;border-radius:6px;margin-bottom:8px}
+  </style>
 </head>
 <body>
   <header>
-    <h1>Carrot Creek Dashboard</h1>
-    <p class="muted">Play demo — not real money</p>
-  </header>
+  <h1>
+    <img src="favicon.png" alt="Logo" style="height:28px;vertical-align:middle;margin-right:8px">
+    Bunny Bank
+  </h1>
+  <p class="muted">Play demo — not real money</p>
+</header>
+
+<!-- Link favicon in browser tab -->
+<link rel="icon" type="image/png" href="favicon.png">
+
 
   <div class="wrap">
-    <!-- LOGIN -->
+    <!-- LOGIN (visible by default) -->
     <div class="card" id="loginCard">
       <h2>Login</h2>
       <input id="username" placeholder="Username" autocomplete="username">
@@ -23,9 +49,8 @@
       <p class="muted small">Demo accounts: <strong>admin/admin123</strong>, <strong>user1/user123</strong></p>
     </div>
 
-    <!-- USER DASHBOARD -->
+    <!-- USER DASHBOARD (hidden until login) -->
     <div id="userView" style="display:none">
-      <!-- Balances -->
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center">
           <div>
@@ -36,15 +61,15 @@
         </div>
       </div>
 
-      <!-- Crypto Section -->
       <div class="card">
         <h3>Your Cryptos</h3>
         <div id="cryptoBalances" class="muted small">No cryptos yet</div>
-        <div style="margin-top:12px">
-          <h4>Create New Crypto (cost: 100 CAD)</h4>
+
+        <div style="margin-top:12px"><h4>Create New Crypto (cost: 100 CAD)</h4>
           <input id="newCryptoName" placeholder="New crypto name (e.g. RabbitCoin)">
           <button onclick="createCrypto()">Create Crypto (100 CAD)</button>
         </div>
+
         <div style="margin-top:14px">
           <h4>Trade Crypto</h4>
           <select id="tradeCryptoName"></select>
@@ -57,29 +82,68 @@
         </div>
       </div>
 
-      <!-- Payments -->
       <div class="card">
         <h3>Send Money</h3>
         <select id="payToUser"></select>
         <input id="payAmount" type="number" placeholder="Amount (CAD)">
-        <select id="payCurrency">
-          <option value="CAD">CAD</option>
-          <option value="USD">USD</option>
-        </select>
+        <select id="payCurrency"><option value="CAD">CAD</option><option value="USD">USD</option></select>
         <button onclick="sendPayment()">Send</button>
       </div>
     </div>
 
-    <!-- ADMIN DASHBOARD -->
+    <!-- ADMIN DASHBOARD (hidden until admin login) -->
     <div id="adminView" style="display:none">
-      <!-- Admin cards (same as your GitHub version) -->
+      <div class="card">
+        <h3>Admin — Create Account</h3>
+        <div class="grid">
+          <input id="newUser" placeholder="Username">
+          <input id="newPass" placeholder="Password">
+        </div>
+        <button onclick="createAccount()">Create Account</button>
+      </div>
+
+      <div class="card">
+        <h3>Adjust Exchange Rate</h3>
+        <div class="grid">
+          <input id="rateSym" placeholder="Currency (e.g. USD)">
+          <input id="rateVal" type="number" placeholder="Rate (1 CAD = X)">
+        </div>
+        <button onclick="setRate()">Update Rate</button>
+      </div>
+
+      <div class="card">
+        <h3>Adjust User Balance (Reset)</h3>
+        <div class="grid">
+          <input id="adjUserBalance" placeholder="Username">
+          <input id="adjCurrencyBalance" placeholder="Currency (CAD)">
+        </div>
+        <input id="adjAmountBalance" type="number" placeholder="New Amount">
+        <button onclick="setBalance()">Update Balance</button>
+      </div>
+
+      <div class="card">
+        <h3>Crypto Prices (Admin)</h3>
+        <select id="cryptoPriceName"></select>
+        <input id="cryptoPriceValue" type="number" placeholder="Price in CAD">
+        <button onclick="setCryptoPrice()">Set Price</button>
+        <p class="muted small">Set per-token price used when users buy/sell.</p>
+      </div>
+
+      <div class="card">
+        <h3>All Users</h3>
+        <table>
+          <thead><tr id="userTableHead"></tr></thead>
+          <tbody id="userTableBody"></tbody>
+        </table>
+      </div>
     </div>
+
   </div>
 
   <button id="logoutBtn" onclick="logout()">Logout</button>
 
-  <script>
-  /*
+<script>
+/*
   GitHub Pages demo data (in-memory only).
   For persistence you must use the Azure backend version.
 */
@@ -374,6 +438,6 @@ document.addEventListener('change', (e) => {
 
 /* ensure dropdowns update when page loads */
 populateGlobalSelects();
-  </script>
+</script>
 </body>
 </html>
