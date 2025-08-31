@@ -4,131 +4,104 @@
 <meta charset="UTF-8">
 <title>BunnyBank GitHub Demo</title>
 <style>
-body { font-family: Arial; background:#f0f0f0; margin:0; padding:0; }
-.card { background:white; margin:20px auto; padding:20px; max-width:600px; border-radius:8px; box-shadow:0 0 8px rgba(0,0,0,0.2); }
-.card-content { padding:10px; }
-input, button { padding:8px; margin:5px 0; width:100%; box-sizing:border-box; }
-table { width:100%; border-collapse:collapse; margin-top:10px; }
-th, td { border:1px solid #ccc; padding:6px; text-align:center; }
-#logoutBtn { position:fixed; bottom:10px; right:10px; }
+  body { font-family: Arial, sans-serif; background:#f4f6f9; margin:0; padding:0; }
+  .card { background:white; margin:20px auto; padding:20px; max-width:600px;
+          border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.15); }
+  h2,h3,h4 { margin:0 0 10px; }
+  input, button { padding:10px; margin:5px 0; width:100%; box-sizing:border-box; }
+  table { width:100%; border-collapse:collapse; margin-top:10px; }
+  th, td { border:1px solid #ddd; padding:6px; text-align:center; }
+  #logoutBtn { position:fixed; bottom:10px; right:10px; display:none; }
 </style>
 </head>
 <body>
 
-<!-- LOGIN CARD -->
+<!-- LOGIN -->
 <div class="card" id="loginCard">
-  <div class="card-content">
-    <h2>Login</h2>
-    <input type="text" id="username" placeholder="Username">
-    <input type="password" id="password" placeholder="Password">
-    <button onclick="login()">Login</button>
-  </div>
+  <h2>Login</h2>
+  <input id="username" placeholder="Username">
+  <input id="password" type="password" placeholder="Password">
+  <button onclick="login()">Login</button>
 </div>
 
 <!-- USER DASHBOARD -->
 <div id="userView" style="display:none">
-  <!-- BALANCES -->
   <div class="card">
-    <div class="card-content">
-      <h3>Your Balances</h3>
-      <div id="balances"></div>
-    </div>
+    <h3>Your Balances</h3>
+    <div id="balances"></div>
   </div>
 
-  <!-- CRYPTO -->
-  <div class="card" id="cryptoCard">
-    <div class="card-content">
-      <h3>Your Cryptos</h3>
-      <div id="cryptoBalances"></div>
+  <div class="card">
+    <h3>Your Cryptos</h3>
+    <div id="cryptoBalances"></div>
 
-      <h4>Create New Crypto (100 CAD)</h4>
-      <input type="text" id="newCryptoName" placeholder="Crypto Name">
-      <button onclick="createCrypto()">Create Crypto</button>
+    <h4>Create New Crypto (100 CAD)</h4>
+    <input id="newCryptoName" placeholder="Crypto Name">
+    <button onclick="createCrypto()">Create</button>
 
-      <h4>Trade Crypto</h4>
-      <input type="text" id="tradeCryptoName" placeholder="Crypto Name">
-      <input type="number" id="tradeAmount" placeholder="Amount">
-      <button onclick="buyCrypto()">Buy</button>
-      <button onclick="sellCrypto()">Sell</button>
-    </div>
+    <h4>Trade Crypto</h4>
+    <input id="tradeCryptoName" placeholder="Crypto Name">
+    <input id="tradeAmount" type="number" placeholder="Amount">
+    <button onclick="buyCrypto()">Buy</button>
+    <button onclick="sellCrypto()">Sell</button>
   </div>
 </div>
 
 <!-- ADMIN DASHBOARD -->
 <div id="adminView" style="display:none">
-
-  <!-- CREATE ACCOUNT -->
   <div class="card">
-    <div class="card-content">
-      <h3>Create Account</h3>
-      <input type="text" id="newUser" placeholder="New Username">
-      <input type="text" id="newPass" placeholder="New Password">
-      <button onclick="createAccount()">Create</button>
-    </div>
+    <h3>Create Account</h3>
+    <input id="newUser" placeholder="Username">
+    <input id="newPass" placeholder="Password">
+    <button onclick="createAccount()">Create</button>
   </div>
 
-  <!-- ADJUST EXCHANGE RATE -->
   <div class="card">
-    <div class="card-content">
-      <h3>Adjust Exchange Rate</h3>
-      <input type="text" id="rateSym" placeholder="Currency (USD)">
-      <input type="number" id="rateVal" placeholder="New Rate">
-      <button onclick="setRate()">Update Rate</button>
-    </div>
+    <h3>Adjust Exchange Rate</h3>
+    <input id="rateSym" placeholder="Currency (USD)">
+    <input id="rateVal" type="number" placeholder="New Rate">
+    <button onclick="setRate()">Update Rate</button>
   </div>
 
-  <!-- ADJUST BALANCE -->
   <div class="card">
-    <div class="card-content">
-      <h3>Adjust Balance</h3>
-      <input type="text" id="adjUser" placeholder="Username">
-      <input type="text" id="adjCurrency" placeholder="Currency (CAD)">
-      <input type="number" id="adjAmount" placeholder="New Amount">
-      <button onclick="setBalance()">Update Balance</button>
-    </div>
+    <h3>Adjust User Balance</h3>
+    <input id="adjUser" placeholder="Username">
+    <input id="adjCurrency" placeholder="Currency (CAD)">
+    <input id="adjAmount" type="number" placeholder="New Amount">
+    <button onclick="setBalance()">Update Balance</button>
   </div>
 
-  <!-- ALL USERS TABLE -->
   <div class="card">
-    <div class="card-content">
-      <h3>All Users</h3>
-      <table>
-        <thead>
-          <tr id="userTableHead"></tr>
-        </thead>
-        <tbody id="userTableBody"></tbody>
-      </table>
-    </div>
+    <h3>All Users</h3>
+    <table>
+      <thead><tr id="userTableHead"></tr></thead>
+      <tbody id="userTableBody"></tbody>
+    </table>
   </div>
 </div>
 
-<button id="logoutBtn" onclick="logout()" style="display:none">Logout</button>
+<button id="logoutBtn" onclick="logout()">Logout</button>
 
 <script>
-// --- DEMO DATA ---
 let accounts = {
-  "admin": { password:"admin123", balance:{CAD:1000, USD:726.66}, cryptos:{} },
-  "user1": { password:"user123", balance:{CAD:500, USD:363.33}, cryptos:{} }
+  admin: { password:"admin123", balance:{CAD:1000,USD:726.66}, cryptos:{} },
+  user1: { password:"user123", balance:{CAD:500,USD:363.33}, cryptos:{} }
 };
 let exchangeRates = { CAD:1, USD:0.7266 };
 let currentUser = null;
 
-// --- LOGIN ---
+// LOGIN / LOGOUT
 function login(){
-  const u = document.getElementById("username").value.trim();
-  const p = document.getElementById("password").value.trim();
-  if(!accounts[u] || accounts[u].password!==p){ alert("Login failed"); return; }
-  currentUser = { username:u, ...accounts[u] };
+  const u=document.getElementById("username").value.trim();
+  const p=document.getElementById("password").value.trim();
+  if(!accounts[u]||accounts[u].password!==p){ alert("Invalid login"); return; }
+  currentUser={ username:u, ...accounts[u] };
   document.getElementById("loginCard").style.display="none";
   document.getElementById("userView").style.display="block";
   document.getElementById("logoutBtn").style.display="block";
   if(u==="admin") document.getElementById("adminView").style.display="block";
-  renderBalances();
-  renderCrypto();
-  if(u==="admin") renderUserTable();
+  renderBalances(); renderCrypto(); if(u==="admin") renderUserTable();
 }
-
-// --- LOGOUT ---
 function logout(){
   currentUser=null;
   document.getElementById("loginCard").style.display="block";
@@ -137,92 +110,76 @@ function logout(){
   document.getElementById("logoutBtn").style.display="none";
 }
 
-// --- BALANCES ---
+// USER FUNCTIONS
 function renderBalances(){
-  let html="";
-  for(const c in currentUser.balance) html+=`${c}: ${currentUser.balance[c]}<br>`;
+  let html=""; for(const c in currentUser.balance) html+=`${c}: ${currentUser.balance[c]}<br>`;
   document.getElementById("balances").innerHTML=html;
 }
-
-// --- CRYPTO ---
 function renderCrypto(){
-  let html="";
-  const c = currentUser.cryptos || {};
+  let html=""; const c=currentUser.cryptos||{};
   for(const k in c) html+=`${k}: ${c[k]}<br>`;
   document.getElementById("cryptoBalances").innerHTML=html;
 }
-
 function createCrypto(){
   const name=document.getElementById("newCryptoName").value.trim();
   if(currentUser.balance.CAD<100){ alert("Not enough CAD"); return; }
-  currentUser.balance.CAD-=100;
-  currentUser.cryptos[name]=0;
+  currentUser.balance.CAD-=100; currentUser.cryptos[name]=0;
   accounts[currentUser.username]=currentUser;
   renderBalances(); renderCrypto();
 }
-
 function buyCrypto(){
-  const name=document.getElementById("tradeCryptoName").value.trim();
-  const amount=parseFloat(document.getElementById("tradeAmount").value);
-  if(!currentUser.cryptos[name]){ alert("Crypto does not exist"); return; }
-  const price=100*amount;
-  if(currentUser.balance.CAD<price){ alert("Not enough CAD"); return; }
-  currentUser.balance.CAD-=price;
-  currentUser.cryptos[name]+=amount;
+  const n=document.getElementById("tradeCryptoName").value.trim();
+  const amt=parseFloat(document.getElementById("tradeAmount").value);
+  if(!currentUser.cryptos[n]){ alert("Crypto missing"); return; }
+  const cost=100*amt;
+  if(currentUser.balance.CAD<cost){ alert("Not enough CAD"); return; }
+  currentUser.balance.CAD-=cost; currentUser.cryptos[n]+=amt;
   accounts[currentUser.username]=currentUser;
   renderBalances(); renderCrypto();
 }
-
 function sellCrypto(){
-  const name=document.getElementById("tradeCryptoName").value.trim();
-  const amount=parseFloat(document.getElementById("tradeAmount").value);
-  if(!currentUser.cryptos[name] || currentUser.cryptos[name]<amount){ alert("Not enough crypto"); return; }
-  const price=100*amount;
-  currentUser.cryptos[name]-=amount;
-  currentUser.balance.CAD+=price;
+  const n=document.getElementById("tradeCryptoName").value.trim();
+  const amt=parseFloat(document.getElementById("tradeAmount").value);
+  if(!currentUser.cryptos[n]||currentUser.cryptos[n]<amt){ alert("Not enough crypto"); return; }
+  currentUser.cryptos[n]-=amt; currentUser.balance.CAD+=100*amt;
   accounts[currentUser.username]=currentUser;
   renderBalances(); renderCrypto();
 }
 
-// --- ADMIN FUNCTIONS ---
+// ADMIN FUNCTIONS
 function createAccount(){
   const u=document.getElementById("newUser").value.trim();
   const p=document.getElementById("newPass").value.trim();
   if(accounts[u]){ alert("User exists"); return; }
-  accounts[u]={ password:p, balance:{CAD:100, USD:0}, cryptos:{} };
+  accounts[u]={ password:p, balance:{CAD:100,USD:0}, cryptos:{} };
   renderUserTable();
 }
-
 function setBalance(){
   const u=document.getElementById("adjUser").value.trim();
   const c=document.getElementById("adjCurrency").value.trim();
   const a=parseFloat(document.getElementById("adjAmount").value);
   if(!accounts[u]){ alert("User not found"); return; }
   accounts[u].balance[c]=a;
-  renderUserTable();
   if(currentUser.username===u) renderBalances();
+  renderUserTable();
 }
-
 function setRate(){
   const c=document.getElementById("rateSym").value.trim();
   const r=parseFloat(document.getElementById("rateVal").value);
-  exchangeRates[c]=r;
-  alert("Rate updated");
+  exchangeRates[c]=r; alert("Rate updated");
 }
-
 function renderUserTable(){
   const head=document.getElementById("userTableHead");
   const body=document.getElementById("userTableBody");
   head.innerHTML=""; body.innerHTML="";
   const allCurrencies=new Set();
   Object.values(accounts).forEach(u=>Object.keys(u.balance).forEach(cur=>allCurrencies.add(cur)));
-  const currencyArray=Array.from(allCurrencies);
-  let h="<th>User</th>"; currencyArray.forEach(c=>h+=`<th>${c}</th>`); head.innerHTML=h;
+  const arr=[...allCurrencies];
+  head.innerHTML="<th>User</th>"+arr.map(c=>`<th>${c}</th>`).join("");
   for(const u in accounts){
     let row=`<tr><td>${u}</td>`;
-    currencyArray.forEach(c=>row+=`<td>${accounts[u].balance[c]||0}</td>`);
-    row+="</tr>";
-    body.innerHTML+=row;
+    arr.forEach(c=>row+=`<td>${accounts[u].balance[c]||0}</td>`);
+    row+="</tr>"; body.innerHTML+=row;
   }
 }
 </script>
