@@ -1,261 +1,99 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>BunnyBank GitHub Demo</title>
-<style>
-  /* General body styling */
-body {
-  font-family: Arial, sans-serif;
-  background-color: #f4f6f9;
-  margin: 0;
-  padding: 0;
-}
-
-/* Card container */
-.card {
-  background-color: #fff;
-  margin: 20px auto;
-  padding: 20px;
-  max-width: 600px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-/* Headings */
-h2, h3, h4 {
-  margin: 0 0 10px;
-}
-
-/* Inputs and buttons */
-input, button {
-  padding: 10px;
-  margin: 5px 0;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-/* Tables */
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
-}
-
-th, td {
-  border: 1px solid #ddd;
-  padding: 6px;
-  text-align: center;
-}
-
-/* Logout button */
-#logoutBtn {
-  position: fixed;       /* fixed at screen corner */
-  bottom: 20px;          /* distance from bottom */
-  right: 20px;           /* distance from right */
-  padding: 10px 18px;
-  background-color: #ff4b5c;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  cursor: pointer;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-  z-index: 1000;
-  width: auto;
-  display: none;         /* stays hidden until needed */
-  transition: background 0.3s ease;
-}
-
-#logoutBtn:hover {
-  background-color: #e03e50;
-}
-
-/* Responsive adjustments */
-@media (max-width: 600px) {
-  .card {
-    width: 95%;
-    padding: 15px;
-  }
-
-  #logoutBtn {
-    padding: 8px 14px;
-    font-size: 13px;
-  }
-}
-
-</style>
-</head>
 <body>
+  <!-- Page Header / Top Section -->
+  <header class="page-header">
+    <h1 class="website-title">Carrot Creek Dashboard</h1>
+    <p class="website-subtitle">Bla bla bla bla bla bla</p>
+  </header>
 
-<!-- LOGIN -->
-<div class="card" id="loginCard">
-  <h2>Login</h2>
-  <input id="username" placeholder="Username">
-  <input id="password" type="password" placeholder="Password">
-  <button onclick="login()">Login</button>
-</div>
-
-<!-- USER DASHBOARD -->
-<div id="userView" style="display:none">
+  <!-- Example Card -->
   <div class="card">
-    <h3>Your Balances</h3>
-    <div id="balances"></div>
+    <h2>Welcome to your dashboard</h2>
+    <p>Here’s your chart and account info.</p>
   </div>
 
-  <div class="card">
-    <h3>Your Cryptos</h3>
-    <div id="cryptoBalances"></div>
+  <!-- Logout Button -->
+  <button id="logoutBtn">Logout</button>
 
-    <h4>Create New Crypto (100 CAD)</h4>
-    <input id="newCryptoName" placeholder="Crypto Name">
-    <button onclick="createCrypto()">Create</button>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f6f9;
+      margin: 0;
+      padding: 0;
+    }
 
-    <h4>Trade Crypto</h4>
-    <input id="tradeCryptoName" placeholder="Crypto Name">
-    <input id="tradeAmount" type="number" placeholder="Amount">
-    <button onclick="buyCrypto()">Buy</button>
-    <button onclick="sellCrypto()">Sell</button>
-  </div>
-</div>
+    /* Header / top of page */
+    .page-header {
+      background-color: #ff4b5c;   /* your custom color */
+      color: white;
+      text-align: center;
+      padding: 40px 20px;
+    }
 
-<!-- ADMIN DASHBOARD -->
-<div id="adminView" style="display:none">
-  <div class="card">
-    <h3>Create Account</h3>
-    <input id="newUser" placeholder="Username">
-    <input id="newPass" placeholder="Password">
-    <button onclick="createAccount()">Create</button>
-  </div>
+    .website-title {
+      margin: 0;
+      font-size: 36px;
+      font-weight: bold;
+    }
 
-  <div class="card">
-    <h3>Adjust Exchange Rate</h3>
-    <input id="rateSym" placeholder="Currency (USD)">
-    <input id="rateVal" type="number" placeholder="New Rate">
-    <button onclick="setRate()">Update Rate</button>
-  </div>
+    .website-subtitle {
+      margin: 10px 0 0 0;
+      font-size: 18px;
+      font-weight: normal;
+    }
 
-  <div class="card">
-    <h3>Adjust User Balance</h3>
-    <input id="adjUser" placeholder="Username">
-    <input id="adjCurrency" placeholder="Currency (CAD)">
-    <input id="adjAmount" type="number" placeholder="New Amount">
-    <button onclick="setBalance()">Update Balance</button>
-  </div>
+    /* Card styling */
+    .card {
+      background-color: #fff;
+      margin: 20px auto;
+      padding: 20px;
+      max-width: 600px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
 
-  <div class="card">
-    <h3>All Users</h3>
-    <table>
-      <thead><tr id="userTableHead"></tr></thead>
-      <tbody id="userTableBody"></tbody>
-    </table>
-  </div>
-</div>
+    /* Logout button styling */
+    #logoutBtn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 10px 18px;
+      background-color: #ff4b5c;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+      z-index: 1000;
+      width: auto;
+      display: none;
+      transition: background 0.3s ease;
+    }
 
-<button id="logoutBtn" onclick="logout()">Logout</button>
+    #logoutBtn:hover {
+      background-color: #e03e50;
+    }
 
-<script>
-let accounts = {
-  admin: { password:"admin123", balance:{CAD:1000,USD:726.66}, cryptos:{} },
-  user1: { password:"user123", balance:{CAD:500,USD:363.33}, cryptos:{} }
-};
-let exchangeRates = { CAD:1, USD:0.7266 };
-let currentUser = null;
-
-// LOGIN / LOGOUT
-function login(){
-  const u=document.getElementById("username").value.trim();
-  const p=document.getElementById("password").value.trim();
-  if(!accounts[u]||accounts[u].password!==p){ alert("Invalid login"); return; }
-  currentUser={ username:u, ...accounts[u] };
-  document.getElementById("loginCard").style.display="none";
-  document.getElementById("userView").style.display="block";
-  document.getElementById("logoutBtn").style.display="block";
-  if(u==="admin") document.getElementById("adminView").style.display="block";
-  renderBalances(); renderCrypto(); if(u==="admin") renderUserTable();
-}
-function logout(){
-  currentUser=null;
-  document.getElementById("loginCard").style.display="block";
-  document.getElementById("userView").style.display="none";
-  document.getElementById("adminView").style.display="none";
-  document.getElementById("logoutBtn").style.display="none";
-}
-
-// USER FUNCTIONS
-function renderBalances(){
-  let html=""; for(const c in currentUser.balance) html+=`${c}: ${currentUser.balance[c]}<br>`;
-  document.getElementById("balances").innerHTML=html;
-}
-function renderCrypto(){
-  let html=""; const c=currentUser.cryptos||{};
-  for(const k in c) html+=`${k}: ${c[k]}<br>`;
-  document.getElementById("cryptoBalances").innerHTML=html;
-}
-function createCrypto(){
-  const name=document.getElementById("newCryptoName").value.trim();
-  if(currentUser.balance.CAD<100){ alert("Not enough CAD"); return; }
-  currentUser.balance.CAD-=100; currentUser.cryptos[name]=0;
-  accounts[currentUser.username]=currentUser;
-  renderBalances(); renderCrypto();
-}
-function buyCrypto(){
-  const n=document.getElementById("tradeCryptoName").value.trim();
-  const amt=parseFloat(document.getElementById("tradeAmount").value);
-  if(!currentUser.cryptos[n]){ alert("Crypto missing"); return; }
-  const cost=100*amt;
-  if(currentUser.balance.CAD<cost){ alert("Not enough CAD"); return; }
-  currentUser.balance.CAD-=cost; currentUser.cryptos[n]+=amt;
-  accounts[currentUser.username]=currentUser;
-  renderBalances(); renderCrypto();
-}
-function sellCrypto(){
-  const n=document.getElementById("tradeCryptoName").value.trim();
-  const amt=parseFloat(document.getElementById("tradeAmount").value);
-  if(!currentUser.cryptos[n]||currentUser.cryptos[n]<amt){ alert("Not enough crypto"); return; }
-  currentUser.cryptos[n]-=amt; currentUser.balance.CAD+=100*amt;
-  accounts[currentUser.username]=currentUser;
-  renderBalances(); renderCrypto();
-}
-
-// ADMIN FUNCTIONS
-function createAccount(){
-  const u=document.getElementById("newUser").value.trim();
-  const p=document.getElementById("newPass").value.trim();
-  if(accounts[u]){ alert("User exists"); return; }
-  accounts[u]={ password:p, balance:{CAD:100,USD:0}, cryptos:{} };
-  renderUserTable();
-}
-function setBalance(){
-  const u=document.getElementById("adjUser").value.trim();
-  const c=document.getElementById("adjCurrency").value.trim();
-  const a=parseFloat(document.getElementById("adjAmount").value);
-  if(!accounts[u]){ alert("User not found"); return; }
-  accounts[u].balance[c]=a;
-  if(currentUser.username===u) renderBalances();
-  renderUserTable();
-}
-function setRate(){
-  const c=document.getElementById("rateSym").value.trim();
-  const r=parseFloat(document.getElementById("rateVal").value);
-  exchangeRates[c]=r; alert("Rate updated");
-}
-function renderUserTable(){
-  const head=document.getElementById("userTableHead");
-  const body=document.getElementById("userTableBody");
-  head.innerHTML=""; body.innerHTML="";
-  const allCurrencies=new Set();
-  Object.values(accounts).forEach(u=>Object.keys(u.balance).forEach(cur=>allCurrencies.add(cur)));
-  const arr=[...allCurrencies];
-  head.innerHTML="<th>User</th>"+arr.map(c=>`<th>${c}</th>`).join("");
-  for(const u in accounts){
-    let row=`<tr><td>${u}</td>`;
-    arr.forEach(c=>row+=`<td>${accounts[u].balance[c]||0}</td>`);
-    row+="</tr>"; body.innerHTML+=row;
-  }
-}
-// Made by @bunnyfirth Aug 2025
-</script>
+    /* Responsive tweaks */
+    @media (max-width: 600px) {
+      .page-header {
+        padding: 30px 15px;
+      }
+      .website-title {
+        font-size: 28px;
+      }
+      .website-subtitle {
+        font-size: 16px;
+      }
+      .card {
+        width: 95%;
+        padding: 15px;
+      }
+      #logoutBtn {
+        padding: 8px 14px;
+        font-size: 13px;
+      }
+    }
+  </style>
 </body>
-</html>
-
