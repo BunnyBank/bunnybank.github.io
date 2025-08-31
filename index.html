@@ -42,8 +42,8 @@
   </style>
 </head>
 <body>
-  <!-- Top Left Image -->
-  <img src="favicon.png" alt="Logo" style="position:fixed;top:10px;left:10px;width:85px;height:85px;z-index:999;border-radius:12px;object-fit:cover;">
+  <!-- Fixed Top Left Logo -->
+  <img src="favicon.png" alt="Logo" style="position:fixed;top:10px;left:10px;width:85px;height:85px;z-index:1000;border-radius:12px;object-fit:cover;">
   <header>
     <h1>
       <span style="display:none"></span>
@@ -97,7 +97,7 @@
       <div class="card">
         <h3>Send Money</h3>
         <select id="payToUser"></select>
-        <input id="payAmount" type="number" placeholder="Amount (CAD)">
+        <input id="payAmount" type="number" placeholder="Amount">
         <select id="payCurrency"><option value="CAD">CAD</option><option value="USD">USD</option></select>
         <button onclick="sendPayment()">Send</button>
       </div>
