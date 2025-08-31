@@ -1,0 +1,122 @@
+:root {
+  --bg: #f4f6f9;
+  --card: #fff;
+  --accent: #ff6b6b;
+  --accent-hover: #ff4a55;
+  --muted: #777;
+}
+
+body {
+  font-family: Inter, Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  margin: 0;
+  padding: 0 0 100px; /* extra bottom padding for logout */
+}
+
+/* Header */
+header {
+  background: #ff5a67;
+  color: #fff;
+  padding: 28px 12px 44px;
+  text-align: center;
+}
+header h1 {
+  margin: 0;
+  font-size: 28px;
+  letter-spacing: 0.5px;
+}
+header p {
+  margin: 6px 0 0;
+  color: rgba(255,255,255,0.9);
+  font-size: 13px;
+}
+
+/* Wrappers & Cards */
+.wrap {
+  max-width: 920px;
+  margin: 18px auto;
+  padding: 0 12px;
+}
+.card {
+  background: var(--card);
+  border-radius: 10px;
+  padding: 18px;
+  box-shadow: 0 6px 18px rgba(20,20,30,0.06);
+  margin-bottom: 16px;
+}
+h2, h3, h4 { margin: 0 0 10px; }
+
+/* Inputs & Buttons */
+input, select, button {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  margin: 6px 0;
+  border-radius: 6px;
+  border: 1px solid #e6e9ee;
+  font-size: 14px;
+}
+button {
+  background: #2b7cff;
+  color: #fff;
+  border: 0;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+button:hover { background: #1f63d8; }
+button.secondary {
+  background: #eee;
+  color: #222;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2,1fr);
+  gap: 12px;
+}
+@media(max-width:700px){.grid{grid-template-columns:1fr}}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th, td {
+  padding: 8px;
+  border: 1px solid #edf0f3;
+  text-align: center;
+  font-size: 14px;
+}
+
+/* Logout Button */
+#logoutBtn {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  padding: 12px 20px;
+  background: var(--accent);
+  color: #fff;
+  border: 0;
+  border-radius: 12px;
+  display: none;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  cursor: pointer;
+  font-size: 14px;
+  z-index: 1000;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+#logoutBtn:hover {
+  background: var(--accent-hover);
+  transform: translateY(-2px);
+}
+
+/* Misc */
+.muted { color: var(--muted); font-size: 13px; }
+.small { font-size: 13px; padding: 8px; }
+.notice {
+  background: #fffbe6;
+  border-left: 4px solid #ffd966;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
