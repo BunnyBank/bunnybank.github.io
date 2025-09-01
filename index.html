@@ -44,6 +44,7 @@
 <body>
   <!-- Fixed Top Left Logo -->
   <img src="favicon.png" alt="Logo" style="position:fixed;top:10px;left:10px;width:85px;height:85px;z-index:1000;border-radius:12px;object-fit:cover;">
+
   <header>
     <h1>
       <span style="display:none"></span>
@@ -51,8 +52,9 @@
     </h1>
     <p style="color: #000; font-size: 13px;">Play demo — not real money</p>
   </header>
+
   <div class="wrap">
-    <!-- LOGIN (visible by default) -->
+    <!-- LOGIN -->
     <div class="card" id="loginCard">
       <h2>Login</h2>
       <input id="username" placeholder="Username" autocomplete="username">
@@ -61,7 +63,7 @@
       <p class="muted small">Demo accounts: <strong>admin/admin123</strong>, <strong>user1/user123</strong></p>
     </div>
 
-    <!-- USER DASHBOARD (hidden until login) -->
+    <!-- USER DASHBOARD -->
     <div id="userView" style="display:none">
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center">
@@ -76,12 +78,11 @@
       <div class="card">
         <h3>Your Cryptos</h3>
         <div id="cryptoBalances" class="muted small">No cryptos yet</div>
-
-        <div style="margin-top:12px"><h4>Create New Crypto (cost: 100 CAD)</h4>
+        <div style="margin-top:12px">
+          <h4>Create New Crypto (cost: 100 CAD)</h4>
           <input id="newCryptoName" placeholder="New crypto name (e.g. RabbitCoin)">
           <button onclick="createCrypto()">Create Crypto (100 CAD)</button>
         </div>
-
         <div style="margin-top:14px">
           <h4>Trade Crypto</h4>
           <select id="tradeCryptoName"></select>
@@ -103,7 +104,7 @@
       </div>
     </div>
 
-    <!-- ADMIN DASHBOARD (hidden until admin login) -->
+    <!-- ADMIN DASHBOARD -->
     <div id="adminView" style="display:none">
       <div class="card">
         <h3>Admin — Create Account</h3>
@@ -112,6 +113,13 @@
           <input id="newPass" placeholder="Password">
         </div>
         <button onclick="createAccount()">Create Account</button>
+      </div>
+
+      <div class="card">
+        <h3>Add Currency</h3>
+        <input id="newCurrencyName" placeholder="Currency code (e.g. EUR)">
+        <input id="newCurrencyRate" type="number" placeholder="Rate vs CAD (1 CAD = X)">
+        <button onclick="addCurrency()">Add Currency</button>
       </div>
 
       <div class="card">
@@ -126,8 +134,8 @@
       <div class="card">
         <h3>Adjust User Balance (Reset)</h3>
         <div class="grid">
-          <input id="adjUserBalance" placeholder="Username">
-          <input id="adjCurrencyBalance" placeholder="Currency (CAD)">
+          <select id="adjUserBalance"></select>
+          <select id="adjCurrencyBalance"></select>
         </div>
         <input id="adjAmountBalance" type="number" placeholder="New Amount">
         <button onclick="setBalance()">Update Balance</button>
@@ -155,302 +163,252 @@
   <button id="logoutBtn" onclick="logout()" style="position:fixed;right:18px;bottom:18px;width:auto;">Logout</button>
 
 <script>
-/*
-  GitHub Pages demo data (in-memory only).
-  For persistence you must use the Azure backend version.
-*/
 let accounts = {
   admin: { password: "admin123", balance: { CAD: 1000, USD: 726.66 }, cryptos: {} },
   user1: { password: "user123", balance: { CAD: 500, USD: 363.33 }, cryptos: {} }
 };
-let cryptoPrices = {};   // e.g. { "RabbitCoin": 100 }
+let cryptoPrices = {};
 let exchangeRates = { CAD: 1, USD: 0.7266 };
 let currentUser = null;
 
-/* ---------- Utility / Init ---------- */
 function hideAllDashboards() {
-  document.getElementById('userView').style.display = 'none';
-  document.getElementById('adminView').style.display = 'none';
-  document.getElementById('logoutBtn').style.display = 'none';
+  document.getElementById('userView').style.display='none';
+  document.getElementById('adminView').style.display='none';
+  document.getElementById('logoutBtn').style.display='none';
 }
 function showLogin() {
-  document.getElementById('loginCard').style.display = 'block';
+  document.getElementById('loginCard').style.display='block';
   hideAllDashboards();
-  document.getElementById('welcomeUser').innerText = '';
+  document.getElementById('welcomeUser').innerText='';
 }
 function initPage() {
-  // on load: show login only
   showLogin();
   populateGlobalSelects();
 }
 window.addEventListener('load', initPage);
 
-/* ---------- Login / Logout ---------- */
 function login() {
-  const u = document.getElementById('username').value.trim();
-  const p = document.getElementById('password').value.trim();
-  if (!u || !p) { alert('Enter username and password'); return; }
-  if (!accounts[u]) { alert('User not found'); return; }
-  if (accounts[u].password !== p) { alert('Incorrect password'); return; }
+  const u=document.getElementById('username').value.trim();
+  const p=document.getElementById('password').value.trim();
+  if(!u||!p){alert('Enter username and password');return;}
+  if(!accounts[u]){alert('User not found');return;}
+  if(accounts[u].password!==p){alert('Incorrect password');return;}
 
-  // Set currentUser (deep-ish copy)
-  currentUser = { username: u, balance: { ...accounts[u].balance }, cryptos: { ...accounts[u].cryptos }, isAdmin: (u === 'admin') };
-  // show dashboards
-  document.getElementById('loginCard').style.display = 'none';
-  document.getElementById('userView').style.display = 'block';
-  document.getElementById('logoutBtn').style.display = 'block';
-  if (currentUser.isAdmin) document.getElementById('adminView').style.display = 'block';
-  document.getElementById('welcomeUser').innerText = currentUser.username;
+  currentUser={username:u,balance:{...accounts[u].balance},cryptos:{...accounts[u].cryptos},isAdmin:(u==='admin')};
+  document.getElementById('loginCard').style.display='none';
+  document.getElementById('userView').style.display='block';
+  document.getElementById('logoutBtn').style.display='block';
+  if(currentUser.isAdmin) document.getElementById('adminView').style.display='block';
+  document.getElementById('welcomeUser').innerText=currentUser.username;
   renderBalances();
   renderCrypto();
   populateGlobalSelects();
-  if (currentUser.isAdmin) renderUserTable();
+  if(currentUser.isAdmin) renderUserTable();
 }
 
 function logout() {
-  // persist currentUser changes to accounts (demo persists in-memory)
-  if (currentUser) accounts[currentUser.username] = { password: accounts[currentUser.username].password, balance: currentUser.balance, cryptos: currentUser.cryptos };
-  currentUser = null;
-  // show login, hide everything else
+  if(currentUser) accounts[currentUser.username]={password:accounts[currentUser.username].password,balance:currentUser.balance,cryptos:currentUser.cryptos};
+  currentUser=null;
   showLogin();
 }
 
-/* ---------- Rendering ---------- */
 function renderBalances() {
-  if (!currentUser) return;
-  const container = document.getElementById('balances');
-  let html = '';
-  for (const cur in currentUser.balance) {
-    html += `<strong>${cur}</strong>: ${Number(currentUser.balance[cur]).toFixed(2)} <br>`;
+  if(!currentUser) return;
+  const container=document.getElementById('balances');
+  let html='';
+  for(const cur in currentUser.balance){
+    html+=`<strong>${cur}</strong>: ${Number(currentUser.balance[cur]).toFixed(2)} <br>`;
+    if(cur==='USD') html+=`<div style="margin-bottom:8px;"><a href="https://en.wikipedia.org/wiki/United_States_dollar" target="_blank" style="font-size:14px;color:#2b7cff;text-decoration:underline;">Learn more about USD</a></div>`;
+    if(cur==='CAD') html+=`<div style="margin-bottom:8px;"><a href="https://en.wikipedia.org/wiki/Canadian_dollar" target="_blank" style="font-size:14px;color:#2b7cff;text-decoration:underline;">Learn more about CAD</a></div>`;
   }
-  container.innerHTML = html;
+  container.innerHTML=html;
 }
 
 function renderCrypto() {
-  if (!currentUser) return;
-  const container = document.getElementById('cryptoBalances');
-  const cryptos = currentUser.cryptos || {};
-  if (Object.keys(cryptos).length === 0) {
-    container.innerHTML = '<span class="muted small">You do not own any crypto yet.</span>';
-    return;
+  if(!currentUser) return;
+  const container=document.getElementById('cryptoBalances');
+  const cryptos=currentUser.cryptos||{};
+  if(Object.keys(cryptos).length===0){container.innerHTML='<span class="muted small">You do not own any crypto yet.</span>';return;}
+  let html='';
+  for(const name in cryptos){
+    const qty=cryptos[name];
+    const price=cryptoPrices[name]??100;
+    html+=`<div><strong>${name}</strong>: ${qty} — price ${price} CAD each</div>`;
   }
-  let html = '';
-  for (const name in cryptos) {
-    const qty = cryptos[name];
-    const price = cryptoPrices[name] ?? 100;
-    html += `<div><strong>${name}</strong>: ${qty} — price ${price} CAD each</div>`;
-  }
-  container.innerHTML = html;
+  container.innerHTML=html;
 }
 
-/* ---------- Dropdown population ---------- */
-function populateGlobalSelects() {
-  // build list of all users and global cryptos
-  const users = Object.keys(accounts);
-  const globalCryptos = new Set();
-  Object.values(accounts).forEach(u => {
-    if (u.cryptos) Object.keys(u.cryptos).forEach(c => globalCryptos.add(c));
-  });
+function populateGlobalSelects(){
+  const users=Object.keys(accounts);
+  const globalCryptos=new Set();
+  Object.values(accounts).forEach(u=>{if(u.cryptos) Object.keys(u.cryptos).forEach(c=>globalCryptos.add(c));});
 
-  // payToUser (exclude current user if present)
-  const paySelect = document.getElementById('payToUser');
-  paySelect.innerHTML = '';
-  users.forEach(u => { if (!currentUser || u !== currentUser.username) paySelect.innerHTML += `<option value="${u}">${u}</option>`; });
+  const paySelect=document.getElementById('payToUser'); paySelect.innerHTML='';
+  users.forEach(u=>{if(!currentUser||u!==currentUser.username) paySelect.innerHTML+=`<option value="${u}">${u}</option>`;});
 
-  // tradeCryptoName: show all global cryptos (if none, add placeholder)
-  const tradeSelect = document.getElementById('tradeCryptoName');
-  tradeSelect.innerHTML = '';
-  if (globalCryptos.size === 0) {
-    tradeSelect.innerHTML = '<option value="">-- no cryptos available --</option>';
-  } else {
-    globalCryptos.forEach(c => tradeSelect.innerHTML += `<option value="${c}">${c}</option>`);
-  }
+  const tradeSelect=document.getElementById('tradeCryptoName'); tradeSelect.innerHTML='';
+  if(globalCryptos.size===0) tradeSelect.innerHTML='<option value="">-- no cryptos available --</option>';
+  else globalCryptos.forEach(c=>tradeSelect.innerHTML+=`<option value="${c}">${c}</option>`);
 
-  // admin crypto price select
-  const priceSelect = document.getElementById('cryptoPriceName');
-  if (priceSelect) {
-    priceSelect.innerHTML = '';
-    if (globalCryptos.size === 0) priceSelect.innerHTML = '<option value="">-- no cryptos --</option>';
-    else globalCryptos.forEach(c => priceSelect.innerHTML += `<option value="${c}">${c}</option>`);
-  }
+  const priceSelect=document.getElementById('cryptoPriceName');
+  if(priceSelect){priceSelect.innerHTML='';if(globalCryptos.size===0) priceSelect.innerHTML='<option value="">-- no cryptos --</option>';else globalCryptos.forEach(c=>priceSelect.innerHTML+=`<option value="${c}">${c}</option>`);}
 
-  // admin table and trade price note
   updateTradePriceNote();
+
+  // Admin dropdowns for Adjust Balance
+  const adjUserSelect=document.getElementById('adjUserBalance');
+  if(adjUserSelect){adjUserSelect.innerHTML='';users.forEach(u=>adjUserSelect.innerHTML+=`<option value="${u}">${u}</option>`);}
+  const adjCurrencySelect=document.getElementById('adjCurrencyBalance');
+  if(adjCurrencySelect){adjCurrencySelect.innerHTML='';Object.keys(exchangeRates).forEach(c=>adjCurrencySelect.innerHTML+=`<option value="${c}">${c}</option>`);}
 }
 
-/* ---------- Crypto actions (user) ---------- */
-function createCrypto() {
-  if (!currentUser) { alert('Login first'); return; }
-  const name = document.getElementById('newCryptoName').value.trim();
-  if (!name) { alert('Enter a name for the crypto'); return; }
-  if (currentUser.balance.CAD < 100) { alert('Not enough CAD to create crypto (cost 100 CAD)'); return; }
-
-  // Subtract cost and add crypto to current user
-  currentUser.balance.CAD -= 100;
-  if (!currentUser.cryptos) currentUser.cryptos = {};
-  if (currentUser.cryptos[name] === undefined) currentUser.cryptos[name] = 0;
-
-  // Register crypto globally (ensure every account has an entry for display consistency)
-  Object.keys(accounts).forEach(u => {
-    if (!accounts[u].cryptos) accounts[u].cryptos = {};
-    if (accounts[u].cryptos[name] === undefined) accounts[u].cryptos[name] = 0;
-  });
-
-  // set default price if not set
-  if (!cryptoPrices[name]) cryptoPrices[name] = 100;
-
-  // persist in-memory
-  accounts[currentUser.username] = { password: accounts[currentUser.username].password, balance: currentUser.balance, cryptos: currentUser.cryptos };
-
-  renderBalances(); renderCrypto(); populateGlobalSelects();
-  alert(`Created crypto "${name}". Price default ${cryptoPrices[name]} CAD`);
+/* ---------- User Crypto Actions ---------- */
+function createCrypto(){
+  if(!currentUser){alert('Login first');return;}
+  const name=document.getElementById('newCryptoName').value.trim();
+  if(!name){alert('Enter a name for the crypto');return;}
+  if(!currentUser.isAdmin && currentUser.balance.CAD<100){alert('Not enough CAD to create crypto (cost 100 CAD)');return;}
+  if(!currentUser.cryptos) currentUser.cryptos={};
+  if(currentUser.cryptos[name]===undefined) currentUser.cryptos[name]=0;
+  Object.keys(accounts).forEach(u=>{if(!accounts[u].cryptos) accounts[u].cryptos={};if(accounts[u].cryptos[name]===undefined) accounts[u].cryptos[name]=0;});
+  if(!cryptoPrices[name]) cryptoPrices[name]=100;
+  if(!currentUser.isAdmin) currentUser.balance.CAD-=100;
+  accounts[currentUser.username]={password:accounts[currentUser.username].password,balance:currentUser.balance,cryptos:currentUser.cryptos};
+  renderBalances();renderCrypto();populateGlobalSelects();alert(`Created crypto "${name}". Price default ${cryptoPrices[name]} CAD`);
 }
 
-async function buyCrypto() {
-  if (!currentUser) { alert('Login first'); return; }
-  const name = document.getElementById('tradeCryptoName').value;
-  const amt = parseFloat(document.getElementById('tradeAmount').value);
-  if (!name) { alert('Select a crypto'); return; }
-  if (!amt || amt <= 0) { alert('Enter a valid amount'); return; }
-  const price = cryptoPrices[name] ?? 100;
-  const cost = price * amt;
-  if (currentUser.balance.CAD < cost) { alert('Not enough CAD'); return; }
-
-  currentUser.balance.CAD -= cost;
-  currentUser.cryptos[name] = (currentUser.cryptos[name] || 0) + amt;
-  accounts[currentUser.username] = { password: accounts[currentUser.username].password, balance: currentUser.balance, cryptos: currentUser.cryptos };
-
-  renderBalances(); renderCrypto(); populateGlobalSelects();
-  alert(`Bought ${amt} ${name} for ${cost.toFixed(2)} CAD`);
+async function buyCrypto(){
+  if(!currentUser){alert('Login first');return;}
+  const name=document.getElementById('tradeCryptoName').value;
+  const amt=parseFloat(document.getElementById('tradeAmount').value);
+  if(!name){alert('Select a crypto');return;}
+  if(!amt||amt<=0){alert('Enter a valid amount');return;}
+  const price=cryptoPrices[name]??100;
+  const cost=price*amt;
+  if(currentUser.balance.CAD<cost){alert('Not enough CAD');return;}
+  currentUser.balance.CAD-=cost;
+  currentUser.cryptos[name]=(currentUser.cryptos[name]||0)+amt;
+  accounts[currentUser.username]={password:accounts[currentUser.username].password,balance:currentUser.balance,cryptos:currentUser.cryptos};
+  renderBalances();renderCrypto();populateGlobalSelects();alert(`Bought ${amt} ${name} for ${cost.toFixed(2)} CAD`);
 }
 
-async function sellCrypto() {
-  if (!currentUser) { alert('Login first'); return; }
-  const name = document.getElementById('tradeCryptoName').value;
-  const amt = parseFloat(document.getElementById('tradeAmount').value);
-  if (!name) { alert('Select a crypto'); return; }
-  if (!amt || amt <= 0) { alert('Enter a valid amount'); return; }
-  if ((currentUser.cryptos[name] || 0) < amt) { alert('Not enough crypto'); return; }
-  const price = cryptoPrices[name] ?? 100;
-  const gain = price * amt;
-
-  currentUser.cryptos[name] -= amt;
-  currentUser.balance.CAD += gain;
-  accounts[currentUser.username] = { password: accounts[currentUser.username].password, balance: currentUser.balance, cryptos: currentUser.cryptos };
-
-  renderBalances(); renderCrypto(); populateGlobalSelects();
-  alert(`Sold ${amt} ${name} for ${gain.toFixed(2)} CAD`);
+async function sellCrypto(){
+  if(!currentUser){alert('Login first');return;}
+  const name=document.getElementById('tradeCryptoName').value;
+  const amt=parseFloat(document.getElementById('tradeAmount').value);
+  if(!name){alert('Select a crypto');return;}
+  if(!amt||amt<=0){alert('Enter a valid amount');return;}
+  if((currentUser.cryptos[name]||0)<amt){alert('Not enough crypto');return;}
+  const price=cryptoPrices[name]??100;
+  const gain=price*amt;
+  currentUser.cryptos[name]-=amt;
+  currentUser.balance.CAD+=gain;
+  accounts[currentUser.username]={password:accounts[currentUser.username].password,balance:currentUser.balance,cryptos:currentUser.cryptos};
+  renderBalances();renderCrypto();populateGlobalSelects();alert(`Sold ${amt} ${name} for ${gain.toFixed(2)} CAD`);
 }
 
 /* ---------- Payments ---------- */
-async function sendPayment() {
-  if (!currentUser) { alert('Login first'); return; }
-  const recipient = document.getElementById('payToUser').value;
-  const amount = parseFloat(document.getElementById('payAmount').value);
-  const currency = document.getElementById('payCurrency').value;
-  if (!recipient || !accounts[recipient]) { alert('Select a valid recipient'); return; }
-  if (!amount || amount <= 0) { alert('Enter a valid amount'); return; }
-  if ((currentUser.balance[currency] || 0) < amount) { alert('Insufficient funds'); return; }
-
-  // update balances
-  currentUser.balance[currency] -= amount;
-  accounts[recipient].balance[currency] = (accounts[recipient].balance[currency] || 0) + amount;
-
-  // persist in-memory
-  accounts[currentUser.username] = { password: accounts[currentUser.username].password, balance: currentUser.balance, cryptos: currentUser.cryptos };
-
+async function sendPayment(){
+  if(!currentUser){alert('Login first');return;}
+  const recipient=document.getElementById('payToUser').value;
+  const amount=parseFloat(document.getElementById('payAmount').value);
+  const currency=document.getElementById('payCurrency').value;
+  if(!recipient||!accounts[recipient]){alert('Select a valid recipient');return;}
+  if(!amount||amount<=0){alert('Enter a valid amount');return;}
+  if((currentUser.balance[currency]||0)<amount){alert('Insufficient funds');return;}
+  currentUser.balance[currency]-=amount;
+  accounts[recipient].balance[currency]=(accounts[recipient].balance[currency]||0)+amount;
+  accounts[currentUser.username]={password:accounts[currentUser.username].password,balance:currentUser.balance,cryptos:currentUser.cryptos};
   renderBalances();
-  if (currentUser.isAdmin) renderUserTable();
+  if(currentUser.isAdmin) renderUserTable();
   populateGlobalSelects();
   alert(`Sent ${amount.toFixed(2)} ${currency} to ${recipient}`);
 }
 
-/* ---------- Admin functions ---------- */
-function createAccount() {
-  if (!currentUser || !currentUser.isAdmin) { alert('Admin only'); return; }
-  const u = document.getElementById('newUser').value.trim();
-  const p = document.getElementById('newPass').value.trim();
-  if (!u || !p) { alert('Enter username and password'); return; }
-  if (accounts[u]) { alert('User already exists'); return; }
-  accounts[u] = { password: p, balance: { CAD: 100, USD: 0 }, cryptos: {} };
-  // ensure new user has entries for existing cryptos
-  Object.keys(cryptoPrices).forEach(c => { accounts[u].cryptos[c] = 0; });
-  renderUserTable(); populateGlobalSelects();
-  alert(`Created ${u}`);
+/* ---------- Admin Functions ---------- */
+function createAccount(){
+  if(!currentUser||!currentUser.isAdmin){alert('Admin only');return;}
+  const u=document.getElementById('newUser').value.trim();
+  const p=document.getElementById('newPass').value.trim();
+  if(!u||!p){alert('Enter username and password');return;}
+  if(accounts[u]){alert('User already exists');return;}
+  accounts[u]={password:p,balance:{CAD:100,USD:0},cryptos:{}};
+  Object.keys(cryptoPrices).forEach(c=>accounts[u].cryptos[c]=0);
+  renderUserTable();populateGlobalSelects();alert(`Created ${u}`);
 }
 
-function setRate() {
-  if (!currentUser || !currentUser.isAdmin) { alert('Admin only'); return; }
-  const sym = document.getElementById('rateSym').value.trim();
-  const val = parseFloat(document.getElementById('rateVal').value);
-  if (!sym || !val) { alert('Enter currency and rate'); return; }
-  exchangeRates[sym] = val;
+function addCurrency(){
+  if(!currentUser||!currentUser.isAdmin){alert('Admin only');return;}
+  const sym=document.getElementById('newCurrencyName').value.trim();
+  const val=parseFloat(document.getElementById('newCurrencyRate').value);
+  if(!sym||isNaN(val)){alert('Enter currency and rate');return;}
+  exchangeRates[sym]=val;
+  Object.keys(accounts).forEach(u=>accounts[u].balance[sym]=0);
+  populateGlobalSelects();
+  alert(`Added currency ${sym} with 1 CAD = ${val} ${sym}`);
+}
+
+function setRate(){
+  if(!currentUser||!currentUser.isAdmin){alert('Admin only');return;}
+  const sym=document.getElementById('rateSym').value.trim();
+  const val=parseFloat(document.getElementById('rateVal').value);
+  if(!sym||isNaN(val)){alert('Enter currency and rate');return;}
+  exchangeRates[sym]=val;
   alert(`Set rate: 1 CAD = ${val} ${sym}`);
 }
 
-function setBalance() {
-  if (!currentUser || !currentUser.isAdmin) { alert('Admin only'); return; }
-  const u = document.getElementById('adjUserBalance').value.trim();
-  const cur = document.getElementById('adjCurrencyBalance').value.trim();
-  const amt = parseFloat(document.getElementById('adjAmountBalance').value);
-  if (!u || !cur || isNaN(amt)) { alert('Enter all fields'); return; }
-  if (!accounts[u]) { alert('User not found'); return; }
-  accounts[u].balance[cur] = amt;
-  // if admin edits themselves while logged in, reflect changes
-  if (currentUser.username === u) currentUser.balance[cur] = amt;
-  renderUserTable(); renderBalances();
+function setBalance(){
+  if(!currentUser||!currentUser.isAdmin){alert('Admin only');return;}
+  const u=document.getElementById('adjUserBalance').value;
+  const cur=document.getElementById('adjCurrencyBalance').value;
+  const amt=parseFloat(document.getElementById('adjAmountBalance').value);
+  if(!u||!cur||isNaN(amt)){alert('Enter all fields');return;}
+  accounts[u].balance[cur]=amt;
+  if(currentUser.username===u) currentUser.balance[cur]=amt;
+  renderUserTable();renderBalances();
   alert(`Updated ${u} ${cur} = ${amt}`);
 }
 
-function setCryptoPrice() {
-  if (!currentUser || !currentUser.isAdmin) { alert('Admin only'); return; }
-  const name = document.getElementById('cryptoPriceName').value;
-  const price = parseFloat(document.getElementById('cryptoPriceValue').value);
-  if (!name || isNaN(price)) { alert('Enter crypto and price'); return; }
-  cryptoPrices[name] = price;
+function setCryptoPrice(){
+  if(!currentUser||!currentUser.isAdmin){alert('Admin only');return;}
+  const name=document.getElementById('cryptoPriceName').value;
+  const price=parseFloat(document.getElementById('cryptoPriceValue').value);
+  if(!name||isNaN(price)){alert('Enter crypto and price');return;}
+  cryptoPrices[name]=price;
   updateTradePriceNote();
   alert(`Set ${name} price to ${price} CAD`);
 }
 
-/* ---------- Admin table ---------- */
-function renderUserTable() {
-  if (!currentUser || !currentUser.isAdmin) return;
-  const head = document.getElementById('userTableHead');
-  const body = document.getElementById('userTableBody');
-  head.innerHTML = '';
-  body.innerHTML = '';
+/* ---------- Admin Table ---------- */
+function renderUserTable(){
+  if(!currentUser||!currentUser.isAdmin) return;
+  const head=document.getElementById('userTableHead');
+  const body=document.getElementById('userTableBody');
+  head.innerHTML=''; body.innerHTML='';
 
-  // currency columns (collect unique currencies)
-  const currencySet = new Set();
-  Object.values(accounts).forEach(a => Object.keys(a.balance || {}).forEach(c => currencySet.add(c)));
-  const currencies = Array.from(currencySet);
-  head.innerHTML = '<th>User</th>' + currencies.map(c => `<th>${c}</th>`).join('') + '<th>Cryptos</th>';
-  for (const u of Object.keys(accounts)) {
-    const rowVals = currencies.map(c => `<td>${(accounts[u].balance[c] ?? 0).toFixed ? (accounts[u].balance[c] ?? 0).toFixed(2) : (accounts[u].balance[c] ?? 0)}</td>`).join('');
-    // crypto summary
-    const cryptoSummary = Object.entries(accounts[u].cryptos || {}).map(([k,v]) => `${k}: ${v}`).join(', ') || '-';
-    body.innerHTML += `<tr><td>${u}</td>${rowVals}<td style="text-align:left;padding-left:10px">${cryptoSummary}</td></tr>`;
+  const currencySet=new Set();
+  Object.values(accounts).forEach(a=>Object.keys(a.balance||{}).forEach(c=>currencySet.add(c)));
+  const currencies=Array.from(currencySet);
+  head.innerHTML='<th>User</th>'+currencies.map(c=>`<th>${c}</th>`).join('')+'<th>Cryptos</th>';
+  for(const u of Object.keys(accounts)){
+    const rowVals=currencies.map(c=>`<td>${(accounts[u].balance[c]??0).toFixed? (accounts[u].balance[c]??0).toFixed(2) : (accounts[u].balance[c]??0)}</td>`).join('');
+    const cryptoSummary=Object.entries(accounts[u].cryptos||{}).map(([k,v])=>`${k}: ${v}`).join(', ')||'-';
+    body.innerHTML+=`<tr><td>${u}</td>${rowVals}<td style="text-align:left;padding-left:10px">${cryptoSummary}</td></tr>`;
   }
 }
 
 /* ---------- Helpers ---------- */
-function updateTradePriceNote() {
-  const sel = document.getElementById('tradeCryptoName');
-  const note = document.getElementById('tradePriceNote');
-  const name = sel ? sel.value : null;
-  if (!name) { note.innerText = 'Price: (set by admin)'; return; }
-  const p = cryptoPrices[name] ?? 100;
-  note.innerText = `Price: ${p} CAD each`;
+function updateTradePriceNote(){
+  const sel=document.getElementById('tradeCryptoName');
+  const note=document.getElementById('tradePriceNote');
+  const name=sel?sel.value:null;
+  if(!name){note.innerText='Price: (set by admin)';return;}
+  const p=cryptoPrices[name]??100;
+  note.innerText=`Price: ${p} CAD each`;
 }
 
-/* --- hook: update price note when user changes crypto selection --- */
-document.addEventListener('change', (e) => {
-  if (e.target && e.target.id === 'tradeCryptoName') updateTradePriceNote();
-});
-
-/* ensure dropdowns update when page loads */
+document.addEventListener('change',(e)=>{if(e.target&&e.target.id==='tradeCryptoName') updateTradePriceNote();});
 populateGlobalSelects();
-//made with Code by bunnyfirth
 </script>
 HELLO SAM & GRANT
 </body>
